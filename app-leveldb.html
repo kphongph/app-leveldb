@@ -1,0 +1,34 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`app-leveldb`
+
+
+@demo demo/index.html 
+-->
+
+<dom-module id="app-leveldb">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]</h2>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'app-leveldb',
+
+      properties: {
+        prop1: {
+          type: String,
+          value: 'app-leveldb',
+        },
+      },
+
+    });
+  </script>
+</dom-module>
