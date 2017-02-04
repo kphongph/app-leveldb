@@ -16,9 +16,7 @@
         display: block;
       }
     </style>
-    <h2>Hello [[prop1]]</h2>
-
-    <iron-request id="getAjax"></iron-request>  
+    <h2>Hello </h2>
 
     <iron-ajax id="syncAjax"
       method="POST"
@@ -41,29 +39,11 @@
       ],
 
       properties: {
-        prop1: {
-          type: String,
-          value: 'app-leveldb',
-        },
         query:Object,
-        dbLocation:String,
-        apiKey:String
       },
       observers:[
         '_listDb(db)'
       ],
-      _get:function(key,cb) {
-        var url = this.dbLocation+"/api/dbs/"+this.dbName+"/"+key;
-        url = url+'?apikey='+this.apiKey;
-        var _this = this;
-        this.$.getAjax.send({
-          url:url,
-          method:"GET", 
-          handleAs:"json",
-        }).then(function() {
-          cb({key:key,value:_this.$.getAjax.response});
-        });
-      },
       _listDb:function(db) {
         this.$.syncAjax.generateRequest();
       },
@@ -72,13 +52,6 @@
         var _this = this;
         e.detail.response.forEach(function(item) {
           _this.saveIndex(item);
-        });
-        
-        this.get('65d9fce0e52e11e6a39d8d32416b74be',function(test) {
-          console.log(test);
-          if(test) {
-            _this.put(test);
-          }
         });
       }
       

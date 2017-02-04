@@ -1,4 +1,5 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-ajax/iron-request.html">
 <script src="../dexie/dist/dexie.js"></script>
 
 <script>
@@ -13,11 +14,25 @@
           return [];
         }
       },
+      dbLocation: {
+        type:String
+      },
       dbName: {
         type:String
       },
       viewName: {
         type:String
+      },
+      apiKey: {
+        type:String
+      },
+      waitingList: { 
+        type:Array,
+        readOnly:true,
+        notify:true,
+        value:function() {
+          return [];
+        }
       },
       db:{
         type:Object,
@@ -26,26 +41,48 @@
       }
     },
     observers:[
+      '_waitingChanged(waitingList.splices)'
     ],
-    put:function(obj,cb) {
-      obj['dirty']=true;
-      this.db.put(obj).then(function() {
-        cb();
+    ready:function() {
+      var _this = this;
+      this.db.hook('creating',function(key,obj,trans) {
+        if(obj.index) {
+          _this.push('waitingList',obj);
+        }
       });
     },
-    get:function(key,cb) {
+    put:function(obj) {
+      obj['dirty']=true;
+      this.db.put(obj);
+    },
+    _waitingChanged:function() {
+      var list = this.waitingList;
+      if(list.length > 0) {
+        var obj = list[0];
+        if(obj.index) {
+          console.log('indexing');
+        }
+        console.log(list);
+      }
+    },
+    __pull:function(key,cb) {
+      var url = this.dbLocation+"/api/dbs/"+this.dbName+"/"+key;
+      url = url+'?apikey='+this.apiKey;
+      var _this = this; 
+      var request = document.createElement('iron-request');
+      request.send({
+        url:url,
+        method:"GET", 
+        handleAs:"json",
+      }).then(function() {
+        cb({key:key,value:request.response});
+      });     
+    },
+    getData:function(key,cb) {
       var _this = this;
       this.db.get(key,function(obj) {
         if(obj) {
-          if(obj.index) {
-            _this._get(key,function(value) {
-              _this.db.put(value).then(function() {
-                cb(value);
-              });
-            });
-          } else {
-            cb(obj); 
-          }
+          cb(obj); 
         } else {
           cb(null);
         }
@@ -60,6 +97,7 @@
       });
     },
     __computeDb:function(dbName,viewName) {
+
       if(!dbName) {
         return null;
       }
@@ -67,11 +105,11 @@
       if(!viewName) {
         return null;
       }
-
       var _db = new Dexie(dbName);
       var schema = {};
       schema[viewName] = 'key';
       _db.version(1).stores(schema);
+           
       return _db[viewName];
     }
   };
