@@ -10,6 +10,7 @@
 
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../app-leveldb.html">
     <link rel="import" href="../app-leveldb-document.html">
     <link rel="import" href="../app-leveldb-query.html">
 
@@ -21,14 +22,14 @@
       <h3>Basic app-leveldb demo</h3>
       <demo-snippet>
         <template>
-          <app-leveldb-document></app-leveldb-document>
-          <app-leveldb-query 
+          <app-leveldb
+            log
             db-name="healthcare"
             db-location="https://maas.nuqlis.com:9000"
             view-name="hostid_timestamp_cid_name"
-            query='{"limit":10}'
             api-key="d8369860e4bc11e69c891fda9348f584">
-          </app-leveldb-query>
+          </app-leveldb>
+          <app-leveldb-document></app-leveldb-document>
         </template>
       </demo-snippet>
     </div>

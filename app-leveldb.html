@@ -1,8 +1,12 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../app-storage/app-storage-behavior.html">
+<link rel="import" href="./app-leveldb-database-behavior.html">
+
+<script src="../requirejs/require.js"></script>
 
 <!--
 `app-leveldb`
-
 
 @demo demo/index.html 
 -->
@@ -15,6 +19,16 @@
       }
     </style>
     <h2>Hello [[prop1]]</h2>
+
+    <iron-ajax id="syncAjax"
+      method="POST"
+      url$="{{dbLocation}}/api/query/{{dbName}}/{{viewName}}"
+      params$='{"apikey":"{{apiKey}}"}'
+      body='{"limit":-1}'
+      content-type="application/json"
+      on-response="_handleSyncAjax"
+      handle-as="json">
+    </iron-ajax>
   </template>
 
   <script>
@@ -22,13 +36,65 @@
 
       is: 'app-leveldb',
 
+      behaviors: [
+        Polymer.AppStorageBehavior,
+        Polymer.AppLevelDBDatabaseBehavior
+      ],
+
       properties: {
         prop1: {
           type: String,
           value: 'app-leveldb',
         },
+        dbName:String,
+        dbLocation:String,
+        viewName:String,
+        apiKey:String
       },
-
+      _initializeStoredValue: function() {
+        console.log('_initializeStoredValue');
+        this.$.syncAjax.generateRequest();
+        /*
+        require.config({
+          paths:{
+            "dexie":"https://npmcdn.com/dexie/dist/dexie"
+          }
+        });
+        var _dbName = this.dbName;
+        var _viewName = this.viewName;
+        this._log(_dbName);
+        requirejs(['dexie'],function(Dexie) {
+          var db = new Dexie(_dbName);
+          var schema = {};
+          schema[_viewName]="key,value";
+          db.version(1).stores(schema);
+          db.friends.add({key: "1", value: "21});
+        });
+        this.$.syncAjax.generateRequest();
+        */
+      },
+      _handleSyncAjax:function(e) { 
+        console.log(e.detail.response);
+        require.config({
+          paths:{
+            "dexie":"https://npmcdn.com/dexie/dist/dexie"
+          }
+        });
+        var _dbName = this.dbName;
+        var _viewName = this.viewName;
+        this._log(_dbName);
+        requirejs(['dexie'],function(Dexie) {
+          var db = new Dexie(_dbName);
+          var schema = {};
+          schema[_viewName] = 'value';
+          console.log(schema);
+          db.version(1).stores(schema);
+          e.detail.response.forEach(function(item) {
+            db[_viewName].put({'value':item.value});
+          });
+        });
+      }
+      
     });
   </script>
 </dom-module>
