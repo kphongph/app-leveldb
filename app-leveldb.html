@@ -1,9 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
-<link rel="import" href="../app-storage/app-storage-behavior.html">
+<link rel="import" href="../iron-ajax/iron-request.html">
 <link rel="import" href="./app-leveldb-database-behavior.html">
-
-<script src="../requirejs/require.js"></script>
 
 <!--
 `app-leveldb`
@@ -20,11 +18,13 @@
     </style>
     <h2>Hello [[prop1]]</h2>
 
+    <iron-request id="getAjax"></iron-request>  
+
     <iron-ajax id="syncAjax"
       method="POST"
       url$="{{dbLocation}}/api/query/{{dbName}}/{{viewName}}"
       params$='{"apikey":"{{apiKey}}"}'
-      body='{"limit":-1}'
+      body="{{query}}"
       content-type="application/json"
       on-response="_handleSyncAjax"
       handle-as="json">
@@ -37,7 +37,6 @@
       is: 'app-leveldb',
 
       behaviors: [
-        Polymer.AppStorageBehavior,
         Polymer.AppLevelDBDatabaseBehavior
       ],
 
@@ -46,52 +45,40 @@
           type: String,
           value: 'app-leveldb',
         },
-        dbName:String,
+        query:Object,
         dbLocation:String,
-        viewName:String,
         apiKey:String
       },
-      _initializeStoredValue: function() {
-        console.log('_initializeStoredValue');
-        this.$.syncAjax.generateRequest();
-        /*
-        require.config({
-          paths:{
-            "dexie":"https://npmcdn.com/dexie/dist/dexie"
-          }
+      observers:[
+        '_listDb(db)'
+      ],
+      _get:function(key,cb) {
+        var url = this.dbLocation+"/api/dbs/"+this.dbName+"/"+key;
+        url = url+'?apikey='+this.apiKey;
+        var _this = this;
+        this.$.getAjax.send({
+          url:url,
+          method:"GET", 
+          handleAs:"json",
+        }).then(function() {
+          cb({key:key,value:_this.$.getAjax.response});
         });
-        var _dbName = this.dbName;
-        var _viewName = this.viewName;
-        this._log(_dbName);
-        requirejs(['dexie'],function(Dexie) {
-          var db = new Dexie(_dbName);
-          var schema = {};
-          schema[_viewName]="key,value";
-          db.version(1).stores(schema);
-          db.friends.add({key: "1", value: "21});
-        });
+      },
+      _listDb:function(db) {
         this.$.syncAjax.generateRequest();
-        */
       },
       _handleSyncAjax:function(e) { 
         console.log(e.detail.response);
-        require.config({
-          paths:{
-            "dexie":"https://npmcdn.com/dexie/dist/dexie"
-          }
+        var _this = this;
+        e.detail.response.forEach(function(item) {
+          _this.saveIndex(item);
         });
-        var _dbName = this.dbName;
-        var _viewName = this.viewName;
-        this._log(_dbName);
-        requirejs(['dexie'],function(Dexie) {
-          var db = new Dexie(_dbName);
-          var schema = {};
-          schema[_viewName] = 'value';
-          console.log(schema);
-          db.version(1).stores(schema);
-          e.detail.response.forEach(function(item) {
-            db[_viewName].put({'value':item.value});
-          });
+        
+        this.get('65d9fce0e52e11e6a39d8d32416b74be',function(test) {
+          console.log(test);
+          if(test) {
+            _this.put(test);
+          }
         });
       }
       

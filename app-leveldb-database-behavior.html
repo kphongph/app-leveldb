@@ -1,10 +1,78 @@
 <link rel="import" href="../polymer/polymer.html">
+<script src="../dexie/dist/dexie.js"></script>
 
 <script>
 (function() {
   'use strict';
   Polymer.AppLevelDBDatabaseBehavior = {
-    properites: {
+    properties: {
+      data:{
+        type:Array,
+        notify:true,
+        value:function() {
+          return [];
+        }
+      },
+      dbName: {
+        type:String
+      },
+      viewName: {
+        type:String
+      },
+      db:{
+        type:Object,
+        computed: '__computeDb(dbName,viewName)',
+        notify:true,
+      }
+    },
+    observers:[
+    ],
+    put:function(obj,cb) {
+      obj['dirty']=true;
+      this.db.put(obj).then(function() {
+        cb();
+      });
+    },
+    get:function(key,cb) {
+      var _this = this;
+      this.db.get(key,function(obj) {
+        if(obj) {
+          if(obj.index) {
+            _this._get(key,function(value) {
+              _this.db.put(value).then(function() {
+                cb(value);
+              });
+            });
+          } else {
+            cb(obj); 
+          }
+        } else {
+          cb(null);
+        }
+      });
+    },
+    saveIndex:function(index) {
+      var _this = this;
+      this.db.get(index.value).then(function(obj) {
+        if(!obj) {
+          _this.db.put({key:index.value,index:true});
+        } 
+      });
+    },
+    __computeDb:function(dbName,viewName) {
+      if(!dbName) {
+        return null;
+      }
+
+      if(!viewName) {
+        return null;
+      }
+
+      var _db = new Dexie(dbName);
+      var schema = {};
+      schema[viewName] = 'key';
+      _db.version(1).stores(schema);
+      return _db[viewName];
     }
   };
 })();   
