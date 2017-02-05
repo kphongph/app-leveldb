@@ -54,7 +54,9 @@
         if(obj.index) {
           this.push('waitingList',obj);
         } 
-        return obj;
+        return this.__pull(obj.key).then(function(result) {
+          return result;
+        });
       }.bind(this));
      
       db.hook('updating',function(modifications,key,obj,trans) {
@@ -87,16 +89,16 @@
         }.bind(this));
       }
     },
-    __pull:function(key,cb) {
+    __pull:function(key) {
       var url = this.url+"/"+key;
       url = url+'?apikey='+this.apiKey;
       var request = document.createElement('iron-request');
-      request.send({
+      return request.send({
         url:url,
         method:"GET", 
         handleAs:"json",
       }).then(function() {
-        cb({key:key,value:request.response});
+        return {key:key,value:request.response};
       });     
     }
   };
