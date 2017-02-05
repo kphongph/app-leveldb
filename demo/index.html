@@ -13,7 +13,7 @@
     <link rel="import" href="../../iron-ajax/iron-ajax.html">
     <link rel="import" href="../../paper-input/paper-input.html">
     <link rel="import" href="../app-leveldb-document.html">
-    <link rel="import" href="../app-leveldb.html">
+    <link rel="import" href="../app-leveldb-sync.html">
 
     <style is="custom-style" include="demo-pages-shared-styles">
     </style>
@@ -35,10 +35,12 @@
             auto>
           </iron-ajax>
 
-          <app-leveldb
+          <app-leveldb-sync
+            url="https://maas.nuqlis.com:9000/api/dbs/healthcare"
+            api-key="98229040eb2811e690184b0ac3cc96bd"
             db-name="healthcare_3720140219"
             data="{{view}}">
-          </app-leveldb>
+          </app-leveldb-sync>
 
           <app-leveldb-document
             db-name="healthcare_3720140219"
@@ -48,7 +50,7 @@
             data="{{data}}">
           </app-leveldb-document>
 
-          <paper-input value="{{data.value.completed_step}}"></paper-input> 
+          <paper-input type="number" value="{{data.value.completed_step}}"></paper-input> 
           <span>{{data.value.completed_step}}</span>
           
      

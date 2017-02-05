@@ -12,24 +12,7 @@
       url: {
         type:String
       },
-      _syncable: {
-        type:Boolean
-      },
-      waitingList: { 
-        type:Array,
-        readOnly:true,
-        notify:true,
-        value:function() {
-          return [];
-        }
-      },
-      status:String,
-      syncing: {
-        type:Boolean,
-        notify:true,
-        value:false
-      },
-      persistedData:{
+      updateList: {
         type:Array,
         notify:true,
         value:function() {
@@ -38,56 +21,8 @@
       }
     },
     observers:[
-      '_waitingChanged(waitingList.splices)',
-      '_hook(db)'
     ],
-    _hook:function(db) {
-      console.log('_hook');
-      db.hook('creating',function(key,obj,trans) {
-        if(obj.index) {
-          this.push('waitingList',obj);
-        }
-      }.bind(this));
-
-      db.hook('reading',function(obj) {
-        if(!obj) return null;
-        if(obj.index) {
-          this.push('waitingList',obj);
-        } 
-        return this.__pull(obj.key).then(function(result) {
-          return result;
-        });
-      }.bind(this));
-     
-      db.hook('updating',function(modifications,key,obj,trans) {
-        console.log('updating',key);
-      }.bind(this));
-    },
-    _waitingChanged:function() {
-      if(this.waitingList.length > 0) {
-        if(!this.syncing) {
-          this.syncing=true;
-          this._sync();
-        }
-      }
-    },
-    _sync:function() {
-      var obj = this.pop('waitingList');
-      var check_done = function() {
-        if(this.waitingList.length == 0) { 
-          this.set('syncing',false);
-        } else {
-          this._sync();
-        }
-      }.bind(this);
-
-      if(obj.index) {
-        this.__pull(obj.key,function(robj) {
-          this.db.put(robj).then(function() {
-            check_done();
-          }.bind(this));
-        }.bind(this));
-      }
+    listeners: {
     },
     __pull:function(key) {
       var url = this.url+"/"+key;
@@ -98,7 +33,29 @@
         method:"GET", 
         handleAs:"json",
       }).then(function() {
-        return {key:key,value:request.response};
+        return new Promise(function(fulfill,reject) {
+          fulfill({key:key,value:request.response});
+        });
+      });     
+    },
+    __push:function(obj) {
+      var url = this.url+"/"+obj.key;
+      url = url+'?apikey='+this.apiKey;
+      var request = document.createElement('iron-request');
+      return request.send({
+        url:url,
+        method:"POST", 
+        headers:{
+          'content-type':'application/json'
+        },
+        body:JSON.stringify(obj.value),
+        handleAs:"json",
+      }).then(function() {
+        return new Promise(function(fulfill,reject) {
+          if(request.response.ok) {
+            fulfill();
+          }
+        });
       });     
     }
   };

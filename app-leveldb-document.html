@@ -25,6 +25,7 @@
       behaviors: [
         Polymer.AppLevelDBDatabaseBehavior,
         Polymer.AppLevelDBSynchronizableBehavior,
+        Polymer.AppNetworkStatusBehavior,
       ],
 
       properties: {
@@ -41,18 +42,27 @@
         '_dataChanged(data.*)'
       ],
       ready:function() {
-        this.db.hook
       },
       _keyChanged:function(key) {
         if(key) {
           this.db.get(key).then(function(obj) {
-            console.log(obj);
-            this.set('data',obj);
+            if(this.online) {
+              if(!obj || !obj.dirty) {
+                this.__pull(key).then(function(robj) {
+                  this.db.put(robj);
+                  this.set('data',robj); 
+                }.bind(this));
+              }
+            } else {
+              this.set('data',obj); 
+            }
           }.bind(this));
         }
       },
       _dataChanged:function(data) {
         if(data.path == "data") return;
+        this.fire('leveldb-document-changed',data.base);
+        data.base['dirty']=true
         this.db.put(data.base);
       }
     });

@@ -1,7 +1,8 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-ajax/iron-request.html">
 <link rel="import" href="../app-storage/app-network-status-behavior.html">
-<link rel="import" href="./app-leveldb-database-behavior.html">
-<link rel="import" href="./app-leveldb-synchronizable-behavior.html">
+<link rel="import" href="app-leveldb-database-behavior.html">
+<link rel="import" href="app-leveldb-synchronizable-behavior.html">
 
 <!--
 `app-leveldb-sync`
@@ -24,13 +25,58 @@
 
       behaviors: [
         Polymer.AppLevelDBDatabaseBehavior,
+        Polymer.AppNetworkStatusBehavior,
         Polymer.AppLevelDBSynchronizableBehavior
       ],
-
       properties: {
+        data:{
+          type:Object,
+          notify:true,
+          observer:'_dataChanged'
+        }
       },
-      observers:[
-      ]
+      ready:function() {
+        var interval = 10000;
+        var polling = function() {
+          if(this.online) {
+            this.db.toCollection().each(function(item) {
+              if(item.dirty) {
+                var obj = {'key':item.key,'value':item.value};
+                this.__push(obj).then(function() {
+                  this.db.put(obj);
+                }.bind(this));
+              }
+            }.bind(this)).then(function() {
+              setTimeout(polling,interval);
+            });
+          } else {
+            setTimeout(polling,interval);
+          }
+        }.bind(this);
+
+        setTimeout(polling,interval);
+
+        this.db.hook('creating',function(key,obj,trans) {
+          if(obj.index) {
+            console.log('indexing');
+            this.__pull(key).then(function(obj) {
+              this.db.put(obj);
+            }.bind(this));
+          }       
+        }.bind(this));
+      },
+      _dataChanged:function(data) {
+        console.log(data);
+        if(data) {
+          if(data.length > 0) {
+            data.forEach(function(item) {
+              this.db.get(item.value).then(function(obj) {
+                if(!obj) this.db.put({key:item.value,index:true});
+              }.bind(this));
+            }.bind(this));
+          }       
+        }       
+      }
     });
   </script>
 </dom-module>
