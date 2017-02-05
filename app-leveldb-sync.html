@@ -1,0 +1,36 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../app-storage/app-network-status-behavior.html">
+<link rel="import" href="./app-leveldb-database-behavior.html">
+<link rel="import" href="./app-leveldb-synchronizable-behavior.html">
+
+<!--
+`app-leveldb-sync`
+
+@demo demo/sync.html 
+-->
+
+<dom-module id="app-leveldb-sync">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'app-leveldb-sync',
+
+      behaviors: [
+        Polymer.AppLevelDBDatabaseBehavior,
+        Polymer.AppLevelDBSynchronizableBehavior
+      ],
+
+      properties: {
+      },
+      observers:[
+      ]
+    });
+  </script>
+</dom-module>

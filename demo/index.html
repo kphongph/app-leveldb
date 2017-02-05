@@ -10,28 +10,49 @@
 
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
-    <link rel="import" href="../app-leveldb.html">
+    <link rel="import" href="../../iron-ajax/iron-ajax.html">
+    <link rel="import" href="../../paper-input/paper-input.html">
     <link rel="import" href="../app-leveldb-document.html">
-    <link rel="import" href="../app-leveldb-query.html">
+    <link rel="import" href="../app-leveldb.html">
 
     <style is="custom-style" include="demo-pages-shared-styles">
     </style>
   </head>
   <body>
     <div class="vertical-section-container centered">
-      <h3>Basic app-leveldb demo</h3>
+      <h3>Basic app-leveldb-sync demo</h3>
       <demo-snippet>
         <template>
+          <template is="dom-bind">
+          <iron-ajax 
+            method="POST"
+            url="https://maas.nuqlis.com:9000/api/query/healthcare/hostid_timestamp_cid_name"
+            params='{"apikey":"98229040eb2811e690184b0ac3cc96bd"}'
+            body='{"start":["3720140218"],"limit":-1,"end":["3720140219"]}'
+            handle-as="json"
+            last-response="{{view}}"
+            content-type="application/json"
+            auto>
+          </iron-ajax>
+
           <app-leveldb
-            log
-            db-name="healthcare"
-            db-location="https://maas.nuqlis.com:9000"
-            view-name="hostid_timestamp_cid_name"
-            table-name="hostid_3720140218"
-            query='{"start":["3720140218"],"limit":-1,"end":["3720140219"]}'
-            api-key="d8369860e4bc11e69c891fda9348f584">
+            db-name="healthcare_3720140219"
+            data="{{view}}">
           </app-leveldb>
-          <app-leveldb-document></app-leveldb-document>
+
+          <app-leveldb-document
+            db-name="healthcare_3720140219"
+            url="https://maas.nuqlis.com:9000/api/dbs/healthcare"
+            api-key="98229040eb2811e690184b0ac3cc96bd"
+            key="91275870e52e11e6a39d8d32416b74be"
+            data="{{data}}">
+          </app-leveldb-document>
+
+          <paper-input value="{{data.value.completed_step}}"></paper-input> 
+          <span>{{data.value.completed_step}}</span>
+          
+     
+          </template>
         </template>
       </demo-snippet>
     </div>

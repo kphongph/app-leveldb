@@ -1,6 +1,5 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../iron-ajax/iron-ajax.html">
-<link rel="import" href="../iron-ajax/iron-request.html">
+<link rel="import" href="../app-storage/app-network-status-behavior.html">
 <link rel="import" href="./app-leveldb-database-behavior.html">
 
 <!--
@@ -16,25 +15,10 @@
         display: block;
       }
     </style>
-    <h2>Hello </h2>
-    <template is="dom-if" if="{{syncing}}">
-      Syning..  [[waiting]]
-    </template>
-
-    <iron-ajax id="syncAjax"
-      method="POST"
-      url$="{{dbLocation}}/api/query/{{dbName}}/{{viewName}}"
-      params$='{"apikey":"{{apiKey}}"}'
-      body="{{query}}"
-      content-type="application/json"
-      on-response="_handleSyncAjax"
-      handle-as="json">
-    </iron-ajax>
   </template>
 
   <script>
     Polymer({
-
       is: 'app-leveldb',
 
       behaviors: [
@@ -42,29 +26,21 @@
       ],
 
       properties: {
-        query:Object,
-        waiting: {
-          type:Number,
-          computed:'_waitingCount(waitingList.length)'
+        data: {
+          type:Object,
+          notify:true,
+          observer:'_dataChanged'
         }
       },
-      observers:[
-        '_listDb(db)'
-      ],
-      _waitingCount:function(waitingList) {
-        console.log(waitingList);
-        return waitingList;
-      },
-      _listDb:function(db) {
-        this.$.syncAjax.generateRequest();
-      },
-      _handleSyncAjax:function(e) { 
-        console.log(e.detail.response);
-        e.detail.response.forEach(function(item) {
-          this.saveIndex(item);
-        }.bind(this));
+      _dataChanged:function(data) {
+        if(data) {
+          if(data.length > 0) {
+            data.forEach(function(item) {
+              this.saveIndex(item);
+            }.bind(this));
+          }
+        }
       }
-      
     });
   </script>
 </dom-module>

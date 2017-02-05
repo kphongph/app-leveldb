@@ -7,140 +7,33 @@
   'use strict';
   Polymer.AppLevelDBDatabaseBehavior = {
     properties: {
-      data:{
-        type:Array,
-        notify:true,
-        value:function() {
-          return [];
-        }
-      },
-      dbLocation: {
-        type:String
-      },
       dbName: {
         type:String
       },
-      tableName: {
-        type:String
-      },
-      apiKey: {
-        type:String
-      },
-      waitingList: { 
-        type:Array,
-        readOnly:true,
-        notify:true,
-        value:function() {
-          return [];
-        }
-      },
-      status:String,
-      syncing: {
-        type:Boolean,
-        notify:true,
-        value:false
-      },
       db:{
         type:Object,
-        computed: '__computeDb(dbName,tableName)',
+        computed: '__computeDb(dbName)',
         notify:true,
       }
-    },
-    observers:[
-      '_waitingChanged(waitingList.splices)',
-    ],
-    ready:function() {
-      var _this = this;
-      this.db.hook('creating',function(key,obj,trans) {
-        console.log('creating',key);
-        if(obj.index) {
-          _this.push('waitingList',obj);
-        }
-      });
-
-      this.db.hook('reading',function(obj) {
-        if(!obj) return;
-        if(obj.index) {
-          this.push('waitingList',obj);
-        }
-        return obj;
-      }.bind(this));
-    },
-    put:function(obj) {
-      obj['dirty']=true;
-      this.db.put(obj);
-    },
-    _waitingChanged:function() {
-      if(this.waitingList.length > 0) {
-        if(!this.syncing) {
-          this.syncing=true;
-          this._sync();
-        }
-      }
-    },
-    _sync:function() {
-      var obj = this.pop('waitingList');
-      var check_done = function() {
-        if(this.waitingList.length == 0) { 
-          this.set('syncing',false);
-        } else {
-          this._sync();
-        }
-      }.bind(this);
-
-      if(obj.index) {
-        this.__pull(obj.key,function(robj) {
-          this.db.put(robj).then(function() {
-            check_done();
-          }.bind(this));
-        }.bind(this));
-      }
-    },
-    __pull:function(key,cb) {
-      var url = this.dbLocation+"/api/dbs/"+this.dbName+"/"+key;
-      url = url+'?apikey='+this.apiKey;
-      var _this = this; 
-      var request = document.createElement('iron-request');
-      request.send({
-        url:url,
-        method:"GET", 
-        handleAs:"json",
-      }).then(function() {
-        cb({key:key,value:request.response});
-      });     
-    },
-    getData:function(key,cb) {
-      var _this = this;
-      this.db.get(key,function(obj) {
-        if(obj) {
-          cb(obj); 
-        } else {
-          cb(null);
-        }
-      });
     },
     saveIndex:function(index) {
       this.db.get(index.value).then(function(obj) {
-        console.log(obj);
         if(!obj) {
-          console.log('puting',index.value);
           this.db.put({key:index.value,index:true});
         } 
       }.bind(this));
     },
-    __computeDb:function(dbName,tableName) {
+    __computeDb:function(dbName) {
       if(!dbName) {
         return null;
       }
-      if(!tableName) {
-        return null;
-      }
       var _db = new Dexie(dbName);
+       
       var schema = {};
-      schema[tableName] = 'key';
+      schema['documents']='key';
       _db.version(1).stores(schema);
-      console.log(tableName);
-      return _db[tableName];
+      console.log(_db.documents);
+      return _db.documents;
     }
   };
 })();   

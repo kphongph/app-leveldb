@@ -1,24 +1,60 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../app-storage/app-storage-behavior.html">
+<link rel="import" href="../app-storage/app-network-status-behavior.html">
+<link rel="import" href="./app-leveldb-database-behavior.html">
+<link rel="import" href="./app-leveldb-synchronizable-behavior.html">
 
-<script>
-(function() {
-  'use strict';
-  Polymer({
-    is:'app-leveldb-document',
-    behaviors: [
-      Polymer.AppStorageBehavior
-    ],
-    properties: {
-      docId:{
-        type:String,
-        value:null
+<!--
+`app-leveldb`
+
+@demo demo/index.html 
+-->
+
+<dom-module id="app-leveldb-document">
+  <template>
+    <style>
+      :host {
+        display: block;
       }
-    },
-    save: function() {
-      console.log('save to leveldb');
-    }
-  });
-});
-</script>
+    </style>
+  </template>
 
+  <script>
+    Polymer({
+      is: 'app-leveldb-document',
+
+      behaviors: [
+        Polymer.AppLevelDBDatabaseBehavior,
+        Polymer.AppLevelDBSynchronizableBehavior,
+      ],
+
+      properties: {
+        key: {
+          type:String,
+          observer:'_keyChanged'
+        },
+        data: {
+          type:Object,
+          notify:true,
+        }
+      },
+      observers:[
+        '_dataChanged(data.*)'
+      ],
+      ready:function() {
+        this.db.hook
+      },
+      _keyChanged:function(key) {
+        if(key) {
+          this.db.get(key).then(function(obj) {
+            console.log(obj);
+            this.set('data',obj);
+          }.bind(this));
+        }
+      },
+      _dataChanged:function(data) {
+        if(data.path == "data") return;
+        this.db.put(data.base);
+      }
+    });
+  </script>
+</dom-module>
