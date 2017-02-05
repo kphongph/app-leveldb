@@ -20,7 +20,7 @@
       dbName: {
         type:String
       },
-      viewName: {
+      tableName: {
         type:String
       },
       apiKey: {
@@ -34,35 +34,66 @@
           return [];
         }
       },
+      status:String,
+      syncing: {
+        type:Boolean,
+        notify:true,
+        value:false
+      },
       db:{
         type:Object,
-        computed: '__computeDb(dbName,viewName)',
+        computed: '__computeDb(dbName,tableName)',
         notify:true,
       }
     },
     observers:[
-      '_waitingChanged(waitingList.splices)'
+      '_waitingChanged(waitingList.splices)',
     ],
     ready:function() {
       var _this = this;
       this.db.hook('creating',function(key,obj,trans) {
+        console.log('creating',key);
         if(obj.index) {
           _this.push('waitingList',obj);
         }
       });
+
+      this.db.hook('reading',function(obj) {
+        if(!obj) return;
+        if(obj.index) {
+          this.push('waitingList',obj);
+        }
+        return obj;
+      }.bind(this));
     },
     put:function(obj) {
       obj['dirty']=true;
       this.db.put(obj);
     },
     _waitingChanged:function() {
-      var list = this.waitingList;
-      if(list.length > 0) {
-        var obj = list[0];
-        if(obj.index) {
-          console.log('indexing');
+      if(this.waitingList.length > 0) {
+        if(!this.syncing) {
+          this.syncing=true;
+          this._sync();
         }
-        console.log(list);
+      }
+    },
+    _sync:function() {
+      var obj = this.pop('waitingList');
+      var check_done = function() {
+        if(this.waitingList.length == 0) { 
+          this.set('syncing',false);
+        } else {
+          this._sync();
+        }
+      }.bind(this);
+
+      if(obj.index) {
+        this.__pull(obj.key,function(robj) {
+          this.db.put(robj).then(function() {
+            check_done();
+          }.bind(this));
+        }.bind(this));
       }
     },
     __pull:function(key,cb) {
@@ -89,28 +120,27 @@
       });
     },
     saveIndex:function(index) {
-      var _this = this;
       this.db.get(index.value).then(function(obj) {
+        console.log(obj);
         if(!obj) {
-          _this.db.put({key:index.value,index:true});
+          console.log('puting',index.value);
+          this.db.put({key:index.value,index:true});
         } 
-      });
+      }.bind(this));
     },
-    __computeDb:function(dbName,viewName) {
-
+    __computeDb:function(dbName,tableName) {
       if(!dbName) {
         return null;
       }
-
-      if(!viewName) {
+      if(!tableName) {
         return null;
       }
       var _db = new Dexie(dbName);
       var schema = {};
-      schema[viewName] = 'key';
+      schema[tableName] = 'key';
       _db.version(1).stores(schema);
-           
-      return _db[viewName];
+      console.log(tableName);
+      return _db[tableName];
     }
   };
 })();   

@@ -17,6 +17,9 @@
       }
     </style>
     <h2>Hello </h2>
+    <template is="dom-if" if="{{syncing}}">
+      Syning..  [[waiting]]
+    </template>
 
     <iron-ajax id="syncAjax"
       method="POST"
@@ -40,19 +43,26 @@
 
       properties: {
         query:Object,
+        waiting: {
+          type:Number,
+          computed:'_waitingCount(waitingList.length)'
+        }
       },
       observers:[
         '_listDb(db)'
       ],
+      _waitingCount:function(waitingList) {
+        console.log(waitingList);
+        return waitingList;
+      },
       _listDb:function(db) {
         this.$.syncAjax.generateRequest();
       },
       _handleSyncAjax:function(e) { 
         console.log(e.detail.response);
-        var _this = this;
         e.detail.response.forEach(function(item) {
-          _this.saveIndex(item);
-        });
+          this.saveIndex(item);
+        }.bind(this));
       }
       
     });
