@@ -18,14 +18,14 @@
       }
     </style>
     <iron-ajax
+      id="ajax"
       method="POST"
       url$="{{url}}/api/query/{{remoteDb}}/{{view}}"
       params$='{"apikey":"{{apiKey}}"}'
       body="{{filter}}"
       handle-as="json"
       last-response="{{data}}"
-      content-type="application/json"
-      auto>
+      content-type="application/json">
     </iron-ajax>
   </template>
 
@@ -51,6 +51,9 @@
           type:Object,
           notify:true
         }
+      },
+      start:function() {
+        this.$.ajax.generateRequest();
       },
       _dataChanged:function(data) {
         var self=this;
