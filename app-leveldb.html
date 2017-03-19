@@ -36,20 +36,32 @@
         },
         status:{ 
           type:Object,
-          notify:true
+          notify:true,
+          value:function() {
+            return {'total':0,'sync':0};
+          }
+        },
+      },
+      observers:[
+        '_loading(status.total,status.sync)'
+      ],
+      _loading:function(total,sync) {
+        if(total>0 && total == sync) {
+          this.fire('ready',{'total':total});
         }
       },
       _dataChanged:function(data) {
         var self=this;
-        self.set('status',{'total':0,'new':0,'sync':0});
         if(data) {
           if(data.length > 0) {
-            var _new = 0;
             var _sync = 0;
             self.set('status.total',data.length);
             data.forEach(function(item) {
-             self.save(item).catch(function(obj) {
-               self.set('status.new',++_new);
+             self.save(item)
+              .then(function(obj) {
+                self.set('status.sync',++_sync);
+              })
+              .catch(function(obj) {
                self.pull(obj.key).then(function(res) {
                  self.set('status.sync',++_sync);
                  self.put(res);
