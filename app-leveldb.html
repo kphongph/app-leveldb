@@ -17,16 +17,6 @@
         display: block;
       }
     </style>
-    <iron-ajax
-      id="ajax"
-      method="POST"
-      url$="{{url}}/api/query/{{remoteDb}}/{{view}}"
-      params$='{"apikey":"{{apiKey}}"}'
-      body="{{filter}}"
-      handle-as="json"
-      last-response="{{data}}"
-      content-type="application/json">
-    </iron-ajax>
   </template>
 
   <script>
@@ -44,16 +34,10 @@
           notify:true,
           observer:'_dataChanged'
         },
-        remoteDb:String,
-        view:String,
-        filter:Object,
         status:{ 
           type:Object,
           notify:true
         }
-      },
-      start:function() {
-        this.$.ajax.generateRequest();
       },
       _dataChanged:function(data) {
         var self=this;

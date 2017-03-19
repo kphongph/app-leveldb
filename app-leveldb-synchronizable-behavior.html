@@ -6,6 +6,9 @@
   'use strict';
   Polymer.AppLevelDBSynchronizableBehavior = {
     properties: {
+      url: {
+        type:String
+      },
       apiKey: {
         type:String
       },
@@ -22,7 +25,7 @@
     listeners: {
     },
     pull:function(key) {
-      var url = this.url+"/api/dbs/"+this.remoteDb+'/'+key;
+      var url = this.url+'/'+key;
       url = url+'?apikey='+this.apiKey;
       var request = document.createElement('iron-request');
       return request.send({
@@ -36,7 +39,7 @@
       });     
     },
     push:function(obj) {
-      var url = this.url+"/api/dbs/"+this.remoteDb+'/'+key;
+      var url = this.url+'/'+key;
       url = url+'?apikey='+this.apiKey;
       var request = document.createElement('iron-request');
       return request.send({
