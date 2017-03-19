@@ -3,7 +3,8 @@
   "main": "app-leveldb.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
-    "dexie": "^1.5.1"
+    "dexie": "^1.5.1",
+    "app-storage": "^0.10.0"
   },
   "devDependencies": {
     "paper-input": "^1.1.23",
