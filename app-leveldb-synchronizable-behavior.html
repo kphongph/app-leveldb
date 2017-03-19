@@ -9,9 +9,6 @@
       apiKey: {
         type:String
       },
-      url: {
-        type:String
-      },
       updateList: {
         type:Array,
         notify:true,
@@ -25,7 +22,7 @@
     listeners: {
     },
     pull:function(key) {
-      var url = this.url+"/"+key;
+      var url = this.url+"/api/dbs/"+this.remoteDb+'/'+key;
       url = url+'?apikey='+this.apiKey;
       var request = document.createElement('iron-request');
       return request.send({
@@ -39,7 +36,7 @@
       });     
     },
     push:function(obj) {
-      var url = this.url+"/"+obj.key;
+      var url = this.url+"/api/dbs/"+this.remoteDb+'/'+key;
       url = url+'?apikey='+this.apiKey;
       var request = document.createElement('iron-request');
       return request.send({
