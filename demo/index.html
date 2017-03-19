@@ -39,9 +39,12 @@
             url="https://maas.nuqlis.com:9000/api/dbs/obec_students"
             api-key="125856d0eb2711e690184b0ac3cc96bd"
             db-name="obec_students_1034710674"
+            schema='{"index":"key,value.class,value.room,value.cid,value.name,value.lastname"}'
             status="{{status}}"
             data="{{view}}">
           </app-leveldb>
+
+          
 
           <b>Total</b>
           <span>{{status.total}}</span>

@@ -11,16 +11,19 @@
       dbName: {
         type:String
       },
+      schema: {
+        type:Object
+      },
       db:{
         type:Object,
-        computed: '__computeDb(dbName)',
+        computed: '__computeDb(dbName,schema)',
         notify:true,
       }
     },
     save:function(data) {
      var self = this;
      return new Promise(function(fulfill,reject) {
-       self.db.get(data.value).then(function(obj) {
+       self.db.documents.get(data.value).then(function(obj) {
          if(!obj) {
            reject({key:data.value});
          } else {
@@ -30,18 +33,18 @@
      });
     },
     put:function(obj) {
-     this.db.put(obj);
+     this.db.tables.forEach(function(table) {
+       table.put(obj);
+     });
     },
-    __computeDb:function(dbName) {
+    __computeDb:function(dbName,schema) {
       if(!dbName) {
         return null;
       }
       var _db = new Dexie(dbName);
-       
-      var schema = {};
-      schema['documents']='key';
+      schema['documents'] = 'key';
       _db.version(1).stores(schema);
-      return _db.documents;
+      return _db;
     }
   };
 })();   
