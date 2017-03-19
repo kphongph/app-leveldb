@@ -1,6 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../app-storage/app-network-status-behavior.html">
 <link rel="import" href="./app-leveldb-database-behavior.html">
+<link rel="import" href="./app-leveldb-synchronizable-behavior.html">
 
 <!--
 `app-leveldb`
@@ -22,7 +23,8 @@
       is: 'app-leveldb',
 
       behaviors: [
-        Polymer.AppLevelDBDatabaseBehavior
+        Polymer.AppLevelDBDatabaseBehavior,
+        Polymer.AppLevelDBSynchronizableBehavior,
       ],
 
       properties: {
@@ -30,14 +32,30 @@
           type:Object,
           notify:true,
           observer:'_dataChanged'
+        },
+        status:{ 
+          type:Object,
+          notify:true
         }
       },
       _dataChanged:function(data) {
+        var self=this;
+        self.set('status',{'total':0,'new':0,'sync':0});
         if(data) {
           if(data.length > 0) {
+            var _new = 0;
+            var _sync = 0;
+            self.set('status.total',data.length);
             data.forEach(function(item) {
-              this.saveIndex(item);
-            }.bind(this));
+             self.save(item).catch(function(obj) {
+               self.set('status.new',++_new);
+               console.log(_new);
+               self.pull(obj.key).then(function(res) {
+                 self.set('status.sync',++_sync);
+                 self.put(res);
+               });
+             });
+            });
           }
         }
       }

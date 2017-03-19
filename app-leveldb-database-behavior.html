@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-ajax/iron-request.html">
+
 <script src="../dexie/dist/dexie.js"></script>
 
 <script>
@@ -16,12 +17,20 @@
         notify:true,
       }
     },
-    saveIndex:function(index) {
-      this.db.get(index.value).then(function(obj) {
-        if(!obj) {
-          this.db.put({key:index.value,index:true});
-        } 
-      }.bind(this));
+    save:function(data) {
+     var self = this;
+     return new Promise(function(fulfill,reject) {
+       self.db.get(data.value).then(function(obj) {
+         if(!obj) {
+           reject({key:data.value});
+         } else {
+           fulfill(obj);
+         }
+       });
+     });
+    },
+    put:function(obj) {
+     this.db.put(obj);
     },
     __computeDb:function(dbName) {
       if(!dbName) {
@@ -32,9 +41,9 @@
       var schema = {};
       schema['documents']='key';
       _db.version(1).stores(schema);
-      console.log(_db.documents);
       return _db.documents;
     }
   };
 })();   
+  
 </script>

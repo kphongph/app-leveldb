@@ -24,7 +24,7 @@
     ],
     listeners: {
     },
-    __pull:function(key) {
+    pull:function(key) {
       var url = this.url+"/"+key;
       url = url+'?apikey='+this.apiKey;
       var request = document.createElement('iron-request');
@@ -38,7 +38,7 @@
         });
       });     
     },
-    __push:function(obj) {
+    push:function(obj) {
       var url = this.url+"/"+obj.key;
       url = url+'?apikey='+this.apiKey;
       var request = document.createElement('iron-request');
