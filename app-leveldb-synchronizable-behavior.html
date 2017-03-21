@@ -9,7 +9,7 @@
       url: {
         type:String
       },
-      apiKey: {
+      jwtToken: {
         type:String
       },
       updateList: {
@@ -26,11 +26,12 @@
     },
     pull:function(key) {
       var url = this.url+'/'+key;
-      url = url+'?apikey='+this.apiKey;
       var request = document.createElement('iron-request');
+      var self = this;
       return request.send({
         url:url,
         method:"GET", 
+        headers:{'Authorization':'JWT '+self.jwtToken},
         handleAs:"json",
       }).then(function() {
         return new Promise(function(fulfill,reject) {
