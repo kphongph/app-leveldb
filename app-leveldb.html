@@ -1,8 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 <link rel="import" href="../app-storage/app-network-status-behavior.html">
-<link rel="import" href="./app-leveldb-database-behavior.html">
-<link rel="import" href="./app-leveldb-synchronizable-behavior.html">
 
 <!--
 `app-leveldb`
@@ -23,52 +21,28 @@
     Polymer({
       is: 'app-leveldb',
 
-      behaviors: [
-        Polymer.AppLevelDBDatabaseBehavior,
-        Polymer.AppLevelDBSynchronizableBehavior,
-      ],
-
       properties: {
-        data: {
+        name:String,
+        url:String,
+        dbName:String,
+        jwtToken:String,
+        app:{
           type:Object,
           notify:true,
-          observer:'_dataChanged'
-        },
-        status:{ 
-          type:Object,
-          notify:true,
-          value:function() {
-            return {'total':0,'sync':0};
-          }
-        },
-      },
-      observers:[
-        '_loading(status.total,status.sync)'
-      ],
-      _loading:function(total,sync) {
-        if(total>0 && total == sync) {
-          this.fire('ready',{'total':total});
+          computed:'__computeApp(name,url,dbName,jwtToken)'
         }
       },
-      _dataChanged:function(data) {
-        var self=this;
-        if(data) {
-          if(data.length > 0) {
-            var _sync = 0;
-            self.set('status.total',data.length);
-            data.forEach(function(item) {
-             self.save(item)
-              .then(function(obj) {
-                self.set('status.sync',++_sync);
-              })
-              .catch(function(obj) {
-               self.pull(obj.key).then(function(res) {
-                 self.set('status.sync',++_sync);
-                 self.put(res);
-               });
-             });
-            });
-          }
+      __computeApp:function(name,url,dbName,jwtToken) {
+        console.log(name,url,dbName,jwtToken);
+        if(name && url && dbName && jwtToken) {
+          return {
+            name:name,
+            url:url,
+            dbName:dbName,
+            jwtToken:jwtToken
+          };
+        } else {
+          return null;
         }
       }
     });

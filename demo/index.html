@@ -9,10 +9,11 @@
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../app-storage/app-localstorage/app-localstorage-document.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../../iron-ajax/iron-ajax.html">
     <link rel="import" href="../../paper-input/paper-input.html">
-    <link rel="import" href="../app-leveldb-document.html">
+    <link rel="import" href="../app-leveldb-query.html">
     <link rel="import" href="../app-leveldb.html">
 
     <style is="custom-style" include="demo-pages-shared-styles">
@@ -24,33 +25,41 @@
       <demo-snippet>
         <template>
           <template is="dom-bind">
+          <app-localstorage-document key="jwtToken" data="{{jwtToken}}">
+          </app-localstorage-document>
+          <!--
           <iron-ajax 
             method="POST"
             url="http://maas.nuqlis.com:44300/query/dmc59_1/hostid"
-            headers='{"Authorization":"JWT eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiJCb21iIiwiaWF0IjoxNDg5MDM0MTE0fQ.fv0r1vZ9B-i_AG1ogGdvumNDpnE1eowmhETO-Lqrjpyyz884_p423mH6cn-KVaZFhy9Z9Gs-0zljg6d3KUhKhDJzomJspgHiaMzrnqVs838IviD4ig-oFcSgkqCKn6aXULXoLnpb6ueKshvdHX3NIxlNPd_oPCEDOEg8ufPAnLgb78OHcwwKK_YmB7zidrs-7Ltx93lJJSF0-FO_kd3i_H4Z3vKOtKtoAnSdWQqPr2EVilxzHQwyiKrLUnzIGz6Iv3yS2qIDp8OCXVopSRwM0bnESC0tClF-7EO6J0d1NDxamuX6XHKvuujSaoynMTFtICSY0ojUYRYDDESLvXvLzg"}'
+            headers$='{"Authorization":"JWT {{jwtToken.token}}"}'
             body='{"start":["30070132"],"limit":-1,"end":["30070133"]}'
             handle-as="json"
             last-response="{{view}}"
             content-type="application/json"
             auto>
           </iron-ajax>
+          -->
 
           <app-leveldb
-            url="http://maas.nuqlis.com:44300/dbs/dmc59_1"
-            jwt-token="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiJCb21iIiwiaWF0IjoxNDg5MDM0MTE0fQ.fv0r1vZ9B-i_AG1ogGdvumNDpnE1eowmhETO-Lqrjpyyz884_p423mH6cn-KVaZFhy9Z9Gs-0zljg6d3KUhKhDJzomJspgHiaMzrnqVs838IviD4ig-oFcSgkqCKn6aXULXoLnpb6ueKshvdHX3NIxlNPd_oPCEDOEg8ufPAnLgb78OHcwwKK_YmB7zidrs-7Ltx93lJJSF0-FO_kd3i_H4Z3vKOtKtoAnSdWQqPr2EVilxzHQwyiKrLUnzIGz6Iv3yS2qIDp8OCXVopSRwM0bnESC0tClF-7EO6J0d1NDxamuX6XHKvuujSaoynMTFtICSY0ojUYRYDDESLvXvLzg"
-            db-name="dmc59_30070132"
-            status="{{status}}"
-            schema='{"index":"key,value.LEVEL,value.CLASSROOM"}'
-            data="{{view}}">
+            name="test"
+            url="http://maas.nuqlis.com:44300"
+            db-name="dmc59_1"
+            app="{{app}}"
+            jwt-token="{{jwtToken.token}}">
           </app-leveldb>
-          
 
-          <b>Total</b>
-          <span>{{status.total}}</span>
-          <b>New</b>
-          <span>{{status.new}}</span>
-          <b>Sync</b>
-          <span>{{status.sync}}</span>
+          <app-leveldb-query
+            app="{{app}}"
+            view-name="hostid"
+            start='["30070132"]'
+            end='["30070133"]'
+            data="{{data}}"
+            limit="3">
+          </app-leveldb-query>
+          
+          <template is="dom-repeat" items="{{data}}">
+            <span>{{item.value}}</span>
+          </template>
 
           <!--
           <app-leveldb-document

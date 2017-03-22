@@ -1,23 +1,21 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-ajax/iron-request.html">
+<link rel="import" href="./app-leveldb-common-behavior.html">
 
 <script src="../dexie/dist/dexie.js"></script>
 
 <script>
 (function() {
   'use strict';
-  Polymer.AppLevelDBDatabaseBehavior = {
+  Polymer.AppLeveldbDatabaseBehaviorImpl = {
     properties: {
-      dbName: {
-        type:String
-      },
-      schema: {
+      schema:{
         type:Object
       },
       db:{
         type:Object,
-        computed: '__computeDb(dbName,schema)',
-        notify:true,
+        computed: '__computeDb(app)',
+        notify:true
       }
     },
     save:function(data) {
@@ -37,16 +35,22 @@
        table.put(obj);
      });
     },
-    __computeDb:function(dbName,schema) {
-      if(!dbName) {
+    __computeDb:function(app) {
+      console.log('__computeDb');
+      if(!app.dbName) {
         return null;
       }
-      var _db = new Dexie(dbName);
+      var schema = {};
+      var _db = new Dexie(app.dbName);
       schema['documents'] = 'key';
       _db.version(1).stores(schema);
       return _db;
     }
   };
+  Polymer.AppLeveldbDatabaseBehavior = [
+    Polymer.AppLeveldbCommonBehavior,
+    Polymer.AppLeveldbDatabaseBehaviorImpl
+  ];
 })();   
   
 </script>

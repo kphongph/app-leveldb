@@ -24,6 +24,21 @@
     ],
     listeners: {
     },
+    query:function(query) {
+      var url = this.url+'/'+key;
+      var request = document.createElement('iron-request');
+      var self = this;
+      return request.send({
+        url:url,
+        method:"GET", 
+        headers:{'Authorization':'JWT '+self.jwtToken},
+        handleAs:"json",
+      }).then(function() {
+        return new Promise(function(fulfill,reject) {
+          fulfill({key:key,value:request.response});
+        });
+      });     
+    },
     pull:function(key) {
       var url = this.url+'/'+key;
       var request = document.createElement('iron-request');
