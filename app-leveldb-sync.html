@@ -36,6 +36,7 @@
           var self=this;
           this._setTotal(index.length);
           var synced = 0;
+          var total = index.length;
      
           index.forEach(function(item) {
             db.documents.get(item.value)
@@ -56,11 +57,16 @@
                     'key':item.value,
                     'value':request.response
                   });
-                 // self._setData(request.response);
+                  if(synced == total) {
+                    this.fire('ready',{'db':self.db});
+                  }
                 }).catch(function(err) {
                 });
               } else {
                 self._setSynced(++synced) 
+                if(synced == total) {
+                  this.fire('ready',{'db':self.db});
+                }
               }
             });
           });

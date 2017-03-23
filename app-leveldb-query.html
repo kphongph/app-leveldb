@@ -24,21 +24,35 @@
             type:Number,
             value:-1
           },
+          start:{
+            type:Object,
+            value:function() {
+              return [];
+            }
+          },
+          end:{
+            type:Object,
+            value:function() {
+              return [];
+            }
+          },
           viewName:{
             type:String
           },
           query:{
             type:Object,
-            computed:'__computeQuery(app,viewName,limit)'
+            computed:'__computeQuery(app,viewName,limit,start,end)'
           }
         },
-        __computeQuery:function(app,viewName,limit) {
+        __computeQuery:function(app,viewName,limit,start,end) {
           console.log('+query',app.dbName,limit);
           var url = this.app.url+'/query/'+app.dbName+'/'+viewName;
           var request = document.createElement('iron-request');
           var self = this;
           var _query = {
             "limit":limit,
+            "start":start,
+            "end":end
           };
           request.send({
             url:url,
