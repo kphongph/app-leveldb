@@ -12,9 +12,12 @@
       schema:{
         type:Object
       },
+      name:{
+        type:String
+      },
       db:{
         type:Object,
-        computed: '__computeDb(app)',
+        computed: '__computeDb(app,name)',
         notify:true
       }
     },
@@ -35,13 +38,12 @@
        table.put(obj);
      });
     },
-    __computeDb:function(app) {
-      console.log('__computeDb');
-      if(!app.dbName) {
+    __computeDb:function(app,name) {
+      if(!name) {
         return null;
       }
       var schema = {};
-      var _db = new Dexie(app.dbName);
+      var _db = new Dexie(name);
       schema['documents'] = 'key';
       _db.version(1).stores(schema);
       return _db;

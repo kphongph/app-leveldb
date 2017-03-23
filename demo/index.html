@@ -14,6 +14,7 @@
     <link rel="import" href="../../iron-ajax/iron-ajax.html">
     <link rel="import" href="../../paper-input/paper-input.html">
     <link rel="import" href="../app-leveldb-query.html">
+    <link rel="import" href="../app-leveldb-sync.html">
     <link rel="import" href="../app-leveldb.html">
 
     <style is="custom-style" include="demo-pages-shared-styles">
@@ -56,6 +57,20 @@
             data="{{data}}"
             limit="3">
           </app-leveldb-query>
+          
+          <app-leveldb-sync
+            name="dmc_30070132"
+            total="{{total}}"
+            synced="{{sync}}"
+            app="{{app}}"
+            index="{{data}}">
+          </app-leveldb-sync>
+
+          <p>
+          <span>{{total}}</span>
+          <span>{{sync}}</span>
+          </p>
+            
           
           <template is="dom-repeat" items="{{data}}">
             <span>{{item.value}}</span>

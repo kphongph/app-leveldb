@@ -9,12 +9,16 @@
       Polymer({
         is: 'app-leveldb-query',
         behaviors: [
-          Polymer.AppLeveldbDatabaseBehavior
+          Polymer.AppLeveldbCommonBehavior
         ],
         properties:{
           data:{
             type:Array,
-            notify:true
+            readOnly:true,
+            notify:true,
+            value:function() {
+              return [];
+            }
           },
           limit:{
             type:Number,
@@ -25,12 +29,12 @@
           },
           query:{
             type:Object,
-            computed:'__computeQuery(db,viewName,limit)'
+            computed:'__computeQuery(app,viewName,limit)'
           }
         },
-        __computeQuery:function(db,viewName,limit) {
-          console.log('+query',this.app.dbName,limit);
-          var url = this.app.url+'/query/'+this.app.dbName+'/'+viewName;
+        __computeQuery:function(app,viewName,limit) {
+          console.log('+query',app.dbName,limit);
+          var url = this.app.url+'/query/'+app.dbName+'/'+viewName;
           var request = document.createElement('iron-request');
           var self = this;
           var _query = {
@@ -46,7 +50,7 @@
             body:JSON.stringify(_query),
             handleAs:"json",
           }).then(function() {
-            self.set('data',request.response);
+            self._setData(request.response);
           }).catch(function(err) {
           });
         }
