@@ -53,9 +53,11 @@
                   handleAs:"json"
                 }).then(function() {
                   self._setSynced(++synced) 
-                  db.documents.put({
+                  db.tables.forEach(function(table) {
+                   table.put({
                     'key':item.value,
                     'value':request.response
+                   });
                   });
                   if(synced == total) {
                     this.fire('ready',{'db':self.db});
