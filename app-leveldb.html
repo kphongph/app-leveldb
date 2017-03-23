@@ -22,20 +22,18 @@
       is: 'app-leveldb',
 
       properties: {
-        name:String,
         url:String,
         dbName:String,
         jwtToken:String,
         app:{
           type:Object,
           notify:true,
-          computed:'__computeApp(name,url,dbName,jwtToken)'
+          computed:'__computeApp(url,dbName,jwtToken)'
         }
       },
-      __computeApp:function(name,url,dbName,jwtToken) {
-        if(name && url && dbName && jwtToken) {
+      __computeApp:function(url,dbName,jwtToken) {
+        if(url && dbName && jwtToken) {
           return {
-            name:name,
             url:url,
             dbName:dbName,
             jwtToken:jwtToken
