@@ -17,7 +17,7 @@
       },
       db:{
         type:Object,
-        computed: '__computeDb(app,name)',
+        computed: '__computeDb(app,name,schema)',
         notify:true
       }
     },
@@ -38,11 +38,10 @@
        table.put(obj);
      });
     },
-    __computeDb:function(app,name) {
+    __computeDb:function(app,name,schema) {
       if(!name) {
         return null;
       }
-      var schema = {};
       var _db = new Dexie(name);
       schema['documents'] = 'key';
       _db.version(1).stores(schema);
