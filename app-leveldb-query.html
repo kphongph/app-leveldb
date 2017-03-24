@@ -20,39 +20,22 @@
               return [];
             }
           },
-          limit:{
-            type:Number,
-            value:-1
-          },
-          start:{
-            type:Object,
-            value:function() {
-              return [];
-            }
-          },
-          end:{
-            type:Object,
-            value:function() {
-              return [];
-            }
+          query: {
+            type:Object
           },
           viewName:{
             type:String
           },
-          query:{
+          execute:{
             type:Object,
-            computed:'__computeQuery(app,viewName,limit,start,end)'
+            computed:'__computeQuery(app,viewName,query)'
           }
         },
-        __computeQuery:function(app,viewName,limit,start,end) {
+        __computeQuery:function(app,viewName,query) {
           var url = this.app.url+'/query/'+app.dbName+'/'+viewName;
           var request = document.createElement('iron-request');
           var self = this;
-          var _query = {
-            "limit":limit,
-            "start":start,
-            "end":end
-          };
+          console.log(query);
           request.send({
             url:url,
             method:"POST",
@@ -60,7 +43,7 @@
               'Authorization':'JWT '+self.app.jwtToken,
               'Content-Type':'application/json'
             },
-            body:JSON.stringify(_query),
+            body:JSON.stringify(query),
             handleAs:"json",
           }).then(function() {
             self._setData(request.response);
