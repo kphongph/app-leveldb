@@ -1,10 +1,9 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../app-storage/app-network-status-behavior.html">
 <link rel="import" href="./app-leveldb-database-behavior.html">
-<link rel="import" href="./app-leveldb-synchronizable-behavior.html">
+<link rel="import" href="../iron-ajax/iron-request.html">
 
 <!--
-`app-leveldb`
+`app-leveldb-doucment`
 
 @demo demo/index.html 
 -->
@@ -23,47 +22,62 @@
       is: 'app-leveldb-document',
 
       behaviors: [
-        Polymer.AppLevelDBDatabaseBehavior,
-        Polymer.AppLevelDBSynchronizableBehavior,
-        Polymer.AppNetworkStatusBehavior,
+        Polymer.AppLeveldbDatabaseBehavior
       ],
 
       properties: {
         key: {
-          type:String,
-          observer:'_keyChanged'
+          type:String
         },
-        data: {
+        value: {
           type:Object,
           notify:true,
+        },
+        status: {
+          type:Object,
+          readOnly:true,
+          notify:true
+        },
+        getDoc:{
+          type:Boolean,
+          computed:'__getDoc(app,key)'
         }
       },
-      observers:[
-        '_dataChanged(data.*)'
-      ],
-      ready:function() {
+      __getDoc:function(app,key) {
+        var self = this;
+        var url = app.url+'/dbs/'+app.dbName+'/'+key;
+        var request = document.createElement('iron-request');
+        request.send({
+          url:url,
+          method:"GET",
+          headers:{
+            'Authorization':'JWT '+app.jwtToken
+          },
+          handleAs:"json"
+        }).then(function() {
+          self.set('value',request.response);
+        });
       },
-      _keyChanged:function(key) {
-        if(key) {
-          this.db.get(key).then(function(obj) {
-            if(this.online) {
-              if(!obj || !obj.dirty) {
-                this.__pull(key).then(function(robj) {
-                  this.db.put(robj);
-                  this.set('data',robj); 
-                }.bind(this));
-              }
-            } else {
-              this.set('data',obj); 
-            }
-          }.bind(this));
+      save:function() {
+        var self = this;
+        var url = app.url+'/dbs/'+app.dbName;
+        if(this.key) { 
+          url += '/'+this.key;
         }
-      },
-      _dataChanged:function(data) {
-        if(data.path == "data") return;
-        this.fire('leveldb-document-changed',data.base);
-        data.base['dirty']=true
-        this.db.put(data.base);
+        var request = document.createElement('iron-request');
+
+        request.send({
+          url:url,
+          method:"POST",
+          headers:{
+            'Authorization':'JWT '+app.jwtToken,
+            'Content-Type':'application/json'
+          },
+          body:JSON.stringify(self.value),
+          handleAs:"json"
+        }).then(function() {
+          self._setStatus(request.response);
+        });
       }
     });
   </script>

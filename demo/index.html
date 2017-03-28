@@ -16,6 +16,7 @@
     <link rel="import" href="../app-leveldb-query.html">
     <link rel="import" href="../app-leveldb-sync.html">
     <link rel="import" href="../app-leveldb.html">
+    <link rel="import" href="../app-leveldb-document.html">
 
     <style is="custom-style" include="demo-pages-shared-styles">
     </style>
@@ -37,13 +38,17 @@
             jwt-token="{{jwtToken.token}}">
           </app-leveldb>
 
+          <app-leveldb-document 
+            app="{{app}}"
+            key="290298c3a11511e6aaf557119381496d"
+            value="{{value}}">
+          </app-leveldb-document>
+
           <app-leveldb-query
             app="{{app}}"
             view-name="hostid"
-            start='["30070132"]'
-            end='["30070133"]'
-            data="{{data}}"
-            limit="-1">
+            query='{"start":["30070132"],"end":["30070133"],"limit":-1}'
+            data="{{data}}">
           </app-leveldb-query>
           
           <app-leveldb-sync
@@ -51,31 +56,20 @@
             total="{{total}}"
             synced="{{sync}}"
             app="{{app}}"
+            schema='{}'
             index="{{data}}">
           </app-leveldb-sync>
 
           <p>
           <span>{{total}}</span>
           <span>{{sync}}</span>
+          <p>
+            From app-leveldb-document<br>
+            <span>{{value.CODE}}</span>
+            <span>{{value.S_NAME}}</span>
+          </p>
           </p>
             
-          
-          <template is="dom-repeat" items="{{data}}">
-            <span>{{item.value}}</span>
-          </template>
-
-          <!--
-          <app-leveldb-document
-            db-name="healthcare_3720140219"
-            key="91275870e52e11e6a39d8d32416b74be"
-            data="{{data}}">
-          </app-leveldb-document>
-          -->
-
-          <paper-input type="number" value="{{data.value.completed_step}}"></paper-input> 
-          <span>{{data.value.completed_step}}</span>
-          
-     
           </template>
         </template>
       </demo-snippet>
