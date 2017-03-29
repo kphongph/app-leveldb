@@ -40,10 +40,17 @@
 
           <app-leveldb-sync
             name="dmc59_30070132"
+            schema='{"index":"key,value.cid"}'
             filter-start='["1"]'
             filter-url="https://maas.nuqlis.com:9000/api/query/students_care/cid"
             app="{{app}}">
           </app-leveldb-sync>
+
+          <script>
+            var db = document.querySelector('app-leveldb-sync').db;
+            db.documents.orderBy('value.cid').eachUniqueKey(function(cid) {
+            });
+          </script>
 
           </template>
         </template>
