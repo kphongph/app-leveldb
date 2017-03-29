@@ -60,7 +60,7 @@
       },
       save:function() {
         var self = this;
-        var url = app.url+'/dbs/'+app.dbName;
+        var url = this.app.url+'/dbs/'+this.app.dbName;
         if(this.key) { 
           url += '/'+this.key;
         }
@@ -70,7 +70,7 @@
           url:url,
           method:"POST",
           headers:{
-            'Authorization':'JWT '+app.jwtToken,
+            'Authorization':'JWT '+this.app.jwtToken,
             'Content-Type':'application/json'
           },
           body:JSON.stringify(self.value),
