@@ -40,12 +40,9 @@
 
           <app-leveldb-sync
             name="dmc59_30070132"
-            total="{{total}}"
-            options='{"query":{"query":{"start":["1"],"limit":10},"url":"https://maas.nuqlis.com:9000/api/query/students_care/cid"}}'
-            synced="{{sync}}"
-            app="{{app}}"
-            schema='{}'
-            index="{{data}}">
+            filter-start='["1"]'
+            filter-url="https://maas.nuqlis.com:9000/api/query/students_care/cid"
+            app="{{app}}">
           </app-leveldb-sync>
 
           </template>

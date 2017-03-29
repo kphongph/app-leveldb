@@ -17,74 +17,76 @@
       syncedRevision, changes, partial, 
       applyRemoteChanges, onChangesAccepted, 
       onSuccess, onError) {
-      console.log('sync');
 
-      for(var i=0;i<arguments.length;i++) {
-        console.log(i,arguments[i]);
-      }
-      for(var i=0;i<changes.length;i++) {
-        console.log(JSON.stringify(changes[i]));
-      }
-      // query
-      if(options.query) {
-        var query = options.query;
+      if(!baseRevision && options.filter) {
+        var filter = options.filter;
         var request = document.createElement('iron-request');
         var app = options.app;
+        baseRevision = (new Date()).getTime()-(24*60*60*1000);
         request.send({
-          url:query.url,
+          url:filter.url,
           method:"POST",
           headers:{
             'Authorization':'JWT '+options.app.jwtToken,
             'Content-Type':'application/json'
           },
-            body:JSON.stringify(query.query),
+            body:JSON.stringify(filter.query),
             handleAs:"json",
           }).then(function() {
             var _remoteChanges = [];
+            var count = 0;
             request.response.forEach(function(item) {
-              console.log(item);
               _remoteChanges.push({
                 'type':1,
                 'table':'documents',
-                'obj':{'key':item.value}
+                'obj':{'key':item.value.key,'value':item.value.doc}
               });
             });
-            console.log(JSON.stringify(_remoteChanges));
-            applyRemoteChanges(_remoteChanges,0,false,false);
+            applyRemoteChanges(_remoteChanges,baseRevision,false,false);
           }).catch(function(err) {
           });
+      } else {
+        /*
+        var request = document.createElement('iron-request');
+        request.send({
+          url:url+'?start='+baseRevision,
+          method:"GET",
+          body:{'start':baseRevision},
+          headers:{
+            'Authorization':'JWT '+options.jwtToken
+          },
+          handleAs:"json"
+        }).then(function() {
+          console.log(request.response);
+        });
+        */
       }
- 
-      /*
-      log
-      var request = document.createElement('iron-request');
-      request.send({
-        url:url,
-        method:"GET",
-        headers:{
-          'Authorization':'JWT '+options.jwtToken
-        },
-        handleAs:"json"
-      }).then(function() {
-        console.log(request.response);
-      });
-      */
-
-      
     }
   });
 
   Polymer.AppLeveldbDatabaseBehaviorImpl = {
     properties: {
-      options:{
-        type:Object
+      filterUrl:{
+        type:String
+      },
+      filterStart: {
+        type:Array,
+        value:function() {
+          return [];
+        }
+      },
+      filterEnd: {
+        type:Array,
+        value:function() {
+          return [];
+        }
       },
       name:{
         type:String
       },
       db:{
         type:Object,
-        computed: '__computeDb(app,name,options)',
+        computed: '__computeDb(app,name,filterUrl,filterStart,filterEnd)',
         notify:true
       }
     },
@@ -105,7 +107,7 @@
        table.put(obj);
      });
     },
-    __computeDb:function(app,name,options) {
+    __computeDb:function(app,name,filterUrl,filterStart,filterEnd) {
       if(!name) {
         return null;
       }
@@ -113,14 +115,29 @@
       var schema = {};
       schema['documents'] = 'key';
       
-      var url = this.app.url+'/log/'+this.app.dbName;
-      var opt = {
-        'jwtToken':app.jwtToken,
-      };
-      opt['app']=app;
-      if(options.query) {
-        opt['query']=options.query;
+      var url = app.url+'/log/'+app.dbName;
+      var filter = {};
+      var query = {limit:-1,include_doc:true};
+
+      if(filterStart.length != 0) {
+        query['start']=filterEnd;
       }
+
+      if(filterEnd.length != 0) {
+        query['end']=filterEnd;
+      }
+      
+      if(filterUrl.length != 0) {
+         filter['url']=filterUrl;
+         filter['query']=query;
+      }
+
+      var opt = {
+        'app':app,
+        'jwtToken':app.jwtToken,
+        'filter': filter
+      };
+      
       console.log(app,name,opt);
       _db.version(1).stores(schema);
       _db.syncable.connect('leveldb-log',url,opt);
