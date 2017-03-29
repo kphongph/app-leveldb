@@ -3,13 +3,80 @@
 <link rel="import" href="./app-leveldb-common-behavior.html">
 
 <script src="../dexie/dist/dexie.js"></script>
+<script src="../dexie/addons/Dexie.Observable/dist/dexie-observable.min.js">
+</script>
+<script src="../dexie/addons/Dexie.Syncable/dist/dexie-syncable.min.js">
+</script>
 
 <script>
 (function() {
   'use strict';
+
+  Dexie.Syncable.registerSyncProtocol("leveldb-log", {
+    sync:function(context, url, options, baseRevision, 
+      syncedRevision, changes, partial, 
+      applyRemoteChanges, onChangesAccepted, 
+      onSuccess, onError) {
+      console.log('sync');
+
+      for(var i=0;i<arguments.length;i++) {
+        console.log(i,arguments[i]);
+      }
+      for(var i=0;i<changes.length;i++) {
+        console.log(JSON.stringify(changes[i]));
+      }
+      // query
+      if(options.query) {
+        var query = options.query;
+        var request = document.createElement('iron-request');
+        var app = options.app;
+        request.send({
+          url:query.url,
+          method:"POST",
+          headers:{
+            'Authorization':'JWT '+options.app.jwtToken,
+            'Content-Type':'application/json'
+          },
+            body:JSON.stringify(query.query),
+            handleAs:"json",
+          }).then(function() {
+            var _remoteChanges = [];
+            request.response.forEach(function(item) {
+              console.log(item);
+              _remoteChanges.push({
+                'type':1,
+                'table':'documents',
+                'obj':{'key':item.value}
+              });
+            });
+            console.log(JSON.stringify(_remoteChanges));
+            applyRemoteChanges(_remoteChanges,0,false,false);
+          }).catch(function(err) {
+          });
+      }
+ 
+      /*
+      log
+      var request = document.createElement('iron-request');
+      request.send({
+        url:url,
+        method:"GET",
+        headers:{
+          'Authorization':'JWT '+options.jwtToken
+        },
+        handleAs:"json"
+      }).then(function() {
+        console.log(request.response);
+      });
+      */
+
+      
+    }
+  });
+
   Polymer.AppLeveldbDatabaseBehaviorImpl = {
     properties: {
-      schema:{
+      options:{
         type:Object
       },
       name:{
@@ -17,7 +84,7 @@
       },
       db:{
         type:Object,
-        computed: '__computeDb(app,name,schema)',
+        computed: '__computeDb(app,name,options)',
         notify:true
       }
     },
@@ -38,13 +105,26 @@
        table.put(obj);
      });
     },
-    __computeDb:function(app,name,schema) {
+    __computeDb:function(app,name,options) {
       if(!name) {
         return null;
       }
       var _db = new Dexie(name);
+      var schema = {};
       schema['documents'] = 'key';
+      
+      var url = this.app.url+'/log/'+this.app.dbName;
+      var opt = {
+        'jwtToken':app.jwtToken,
+      };
+      opt['app']=app;
+      if(options.query) {
+        opt['query']=options.query;
+      }
+      console.log(app,name,opt);
       _db.version(1).stores(schema);
+      _db.syncable.connect('leveldb-log',url,opt);
+      _db.documents.toArray();
       return _db;
     }
   };

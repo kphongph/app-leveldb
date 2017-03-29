@@ -38,9 +38,12 @@
           var synced = 0;
           var total = index.length;
      
+          console.log('__computeSync');
           index.forEach(function(item) {
             db.documents.get(item.value)
             .then(function(obj) {
+              console.log(obj);
+              /*
               if(!obj) {
                 var url = app.url+'/dbs/'+app.dbName+'/'+item.value;
                 var request = document.createElement('iron-request');
@@ -70,6 +73,7 @@
                   self.fire('ready',{'db':self.db});
                 }
               }
+              */
             });
           });
         }
