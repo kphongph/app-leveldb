@@ -12,6 +12,7 @@
     <link rel="import" href="../../app-storage/app-localstorage/app-localstorage-document.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../../paper-input/paper-input.html">
+    <link rel="import" href="../../paper-checkbox/paper-checkbox.html">
     <link rel="import" href="../app-leveldb.html">
     <link rel="import" href="../app-leveldb-document.html">
 
@@ -42,12 +43,16 @@
             value="{{value}}">
           </app-leveldb-document>
 
+
           </p>
             From app-leveldb-document<br>
             <span>{{value.cid}}</span>
             <paper-input value="{{value.fname}}" 
               label="fname">
             </paper-input>
+            <p>
+            <paper-checkbox>Insert</paper-checkbox>
+            </p>
             Status:<br>
              ok:<span>{{status.ok}}</span><br>
              key:<span>{{status.key}}</span>
@@ -63,6 +68,14 @@
              .addEventListener('change',function(e) {
              console.log('change'); 
              var doc = document.querySelector('app-leveldb-document');
+             var _input = document.querySelector('paper-input');
+             var checkbox = document.querySelector('paper-checkbox');
+             if(checkbox.checked) {
+               doc.key = null;
+             }
+             if(!doc.value) {
+               doc.value = {'fname':_input.value};
+             }
              doc.save();
              
             });

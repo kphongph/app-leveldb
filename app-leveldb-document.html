@@ -45,6 +45,7 @@
       },
       __getDoc:function(app,key) {
         var self = this;
+        if(!key) return;
         var url = app.url+'/dbs/'+app.dbName+'/'+key;
         var request = document.createElement('iron-request');
         request.send({
