@@ -54,11 +54,15 @@
           </p>
           
           <script>
+            document.querySelector('app-leveldb-document')
+             .addEventListener('response',function(e) {
+             console.log(e);
+            });
+
             document.querySelector('paper-input')
              .addEventListener('change',function(e) {
              console.log('change'); 
              var doc = document.querySelector('app-leveldb-document');
-             console.log(doc);
              doc.save();
              
             });
