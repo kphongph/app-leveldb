@@ -36,11 +36,13 @@
             var _remoteChanges = [];
             var count = 0;
             request.response.forEach(function(item) {
-              _remoteChanges.push({
-                'type':1,
-                'table':'documents',
-                'obj':{'key':item.value.key,'value':item.value.doc}
-              });
+              for(var sname in options.schema){
+                _remoteChanges.push({
+                  'type':1,
+                  'table':sname,
+                  'obj':{'key':item.value.key,'value':item.value.doc}
+                });
+              }
             });
             applyRemoteChanges(_remoteChanges,baseRevision,false,false);
           }).catch(function(err) {
@@ -137,7 +139,8 @@
       var opt = {
         'app':app,
         'jwtToken':app.jwtToken,
-        'filter': filter
+        'filter': filter,
+        'schema':schema
       };
       
       console.log(app,name,opt);
