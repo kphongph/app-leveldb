@@ -12,7 +12,7 @@
     <link rel="import" href="../../app-storage/app-localstorage/app-localstorage-document.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../../iron-ajax/iron-ajax.html">
-    <link rel="import" href="../../paper-input/paper-input.html">
+    <link rel="import" href="../../paper-button/paper-button.html">
     <link rel="import" href="../app-leveldb-query.html">
     <link rel="import" href="../app-leveldb-sync.html">
     <link rel="import" href="../app-leveldb.html">
@@ -59,6 +59,7 @@
             schema='{}'
             index="{{data}}">
           </app-leveldb-sync>
+  
 
           <p>
           <span>{{total}}</span>
@@ -69,7 +70,20 @@
             <span>{{value.S_NAME}}</span>
           </p>
           </p>
-            
+          <paper-button>Refresh</paper-button>
+          <script>
+            document.querySelector('paper-button').addEventListener('tap',function(e) {
+              var db = document.querySelector('app-leveldb-sync').db;
+              console.log(db);
+              db.delete().then(function() {
+                console.log('rerun');
+                db.open();
+                var query = document.querySelector('app-leveldb-query');
+                query.query={"start":["30070132"],"end":["30070133"],"limit":-1};
+              });
+            });
+          </script>
+          
           </template>
         </template>
       </demo-snippet>

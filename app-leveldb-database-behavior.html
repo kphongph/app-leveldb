@@ -2,7 +2,12 @@
 <link rel="import" href="../iron-ajax/iron-request.html">
 <link rel="import" href="./app-leveldb-common-behavior.html">
 
-<script src="../dexie/dist/dexie.js"></script>
+<script src="../dexie/dist/dexie.min.js"></script>
+<!--
+<script src="../dexie/addons/Dexie.Observable/dist/dexie-observable.min.js"></script>
+-->
+
+
 
 <script>
 (function() {
@@ -44,6 +49,15 @@
       }
       var _db = new Dexie(name);
       schema['documents'] = 'key';
+
+      /*
+      _db.on('changes',function(changes) {
+         changes.forEach(function(change) {
+           console.log(JSON.stringify(change));
+         });
+      });
+      */
+
       _db.version(1).stores(schema);
       return _db;
     }
