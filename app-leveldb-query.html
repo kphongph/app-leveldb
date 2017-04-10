@@ -45,6 +45,7 @@
             body:JSON.stringify(query),
             handleAs:"json",
           }).then(function() {
+            self.fire('response',{'response':request.response});
             self._setData(request.response);
           }).catch(function(err) {
           });
