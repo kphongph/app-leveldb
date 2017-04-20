@@ -56,7 +56,11 @@
           },
           handleAs:"json"
         }).then(function() {
-          self.set('value',request.response);
+          if(("ok" in request.response) && request.response.ok == false) {
+            self.fire('error',request.response);
+          } else {
+            self.set('value',request.response);
+          }
         });
       },
       save:function() {
