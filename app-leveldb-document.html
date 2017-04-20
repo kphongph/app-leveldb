@@ -33,6 +33,12 @@
           type:Object,
           notify:true,
         },
+        error: {
+          type:Boolean,
+          readOnly:true,
+          notify:true,
+          value:false
+        },
         status: {
           type:Object,
           readOnly:true,
@@ -57,8 +63,9 @@
           handleAs:"json"
         }).then(function() {
           if(("ok" in request.response) && request.response.ok == false) {
-            self.fire('error',request.response);
+            self._setError(true);
           } else {
+            self._setError(false);
             self.set('value',request.response);
           }
         });
@@ -81,8 +88,13 @@
           body:JSON.stringify(self.value),
           handleAs:"json"
         }).then(function() {
-          self.fire('response',{'response':request.response});
-          self._setStatus(request.response);
+          if(("ok" in request.response) && request.response.ok == false) {
+            self._setError(true);
+          } else {
+            self._setError(false);
+            self.fire('response',{'response':request.response});
+            self._setStatus(request.response);
+          }
         });
       }
     });
